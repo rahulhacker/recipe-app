@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED 1
 
 
 COPY ./requirements.txt /tmp/requirements.txt
+COPY ./requirements.dev.txt /tmp/requirements.dev.text
 
 COPY ./app /app
 
@@ -17,13 +18,17 @@ WORKDIR /app
 
 EXPOSE 8000
 
+ARG DEV=false
 #don't put multiple run commands as it add layers and make ur image heavyweight
 #create a virtual env so that, there is no conflicts between the pyhton image packages
 # and requiremets on
 # add user to the image as it is best practises to not use the root user
 RUN python -m venv /py && \
-        /py/bin/ pip install --upgrade pip && \
+        /py/bin/pip install --upgrade pip && \
         /py/bin/pip install -r /tmp/requirements.txt && \
+        if [ $DEV = "true"]; \ 
+            then /py/bin/pip install -r /tmp/requirements.dev.txt; \
+        fi && \
         rm -rf /tmp && \
         adduser \
            --disabled-password \
